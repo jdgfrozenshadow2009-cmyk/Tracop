@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracop — AI Operating System for Local Shops</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-dark: #1e3a8a;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --red: #dc2626;
+      --red-bg: #fee2e2;
+      --amber: #d97706;
+      --amber-bg: #fef3c7;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 84px;
+    }
+    header {
+      background: linear-gradient(135deg, #0f172a, var(--primary));
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    header h1 { font-size: 18px; font-weight: 700; }
+    header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+    .header-actions { display: flex; gap: 8px; }
+    .icon-btn {
+      background: rgba(255,255,255,0.16);
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .container { max-width: 640px; margin: 0 auto; padding: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 10px; text-align: center; }
+    .stat-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+    .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    input[type="text"], input[type="number"], input[type="password"], textarea, select {
+      width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px;
+      font-size: 14px; font-family: inherit; background: #fff; color: var(--text);
+    }
+    .btn {
+      border: none; border-radius: 11px; padding: 10px 14px; font-size: 14px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-outline { background: #fff; color: var(--text); border: 1px solid #cbd5e1; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    .filter-row, .lang-row, .mode-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .pill { border: 1px solid #cbd5e1; background: #fff; color: var(--text); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .item-card {
+      background: var(--card); border: 1px solid var(--border); border-left: 5px solid var(--primary);
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; display: flex;
+      justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .item-card.low-stock { border-left-color: var(--red); background: #fffafa; }
+    .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-top: 4px; margin-right: 4px; }
+    .badge-cat { background: #dbeafe; color: var(--primary-dark); }
+    .badge-low { background: var(--red-bg); color: var(--red); }
+    .badge-due { background: var(--amber-bg); color: #92400e; }
+    .badge-clear { background: var(--green-bg); color: var(--green); }
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .qty-num { min-width: 54px; text-align: center; font-weight: 800; font-size: 14px; }
+    .mic-wrap { text-align: center; margin: 12px 0; }
+    .mic-btn {
+      width: 78px; height: 78px; border-radius: 50%; border: none; background: var(--primary);
+      color: #fff; font-size: 30px; cursor: pointer; box-shadow: 0 6px 18px rgba(29, 78, 216, 0.3);
+    }
+    .mic-btn.recording { background: var(--red); }
+    .banner { border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 13px; line-height: 1.5; white-space: pre-line; }
+    .banner-ok { background: var(--green-bg); color: #14532d; border: 1px solid #86efac; }
+    .banner-err { background: var(--red-bg); color: #7f1d1d; border: 1px solid #fca5a5; }
+    .banner-info { background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; }
+    .preview-img { width: 100%; max-height: 260px; object-fit: contain; border-radius: 12px; background: #0f172a; margin: 10px 0; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 4px; z-index: 20;
+    }
+    .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 4px 2px; }
+    .nav-btn.active { color: var(--primary); font-weight: 800; }
+    .nav-icon { font-size: 18px; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+    .modal-backdrop.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 16px; padding: 18px; width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; }
+    .calc-display { background: #0f172a; color: #fff; border-radius: 12px; padding: 12px 14px; text-align: right; margin-bottom: 10px; }
+    .calc-expr { font-size: 12px; color: #94a3b8; min-height: 16px; }
+    .calc-val { font-size: 26px; font-weight: 800; margin-top: 2px; }
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .calc-key { border: 1px solid #cbd5e1; background: #f8fafc; color: var(--text); border-radius: 10px; padding: 12px 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .calc-key.op { background: #dbeafe; color: var(--primary-dark); }
+    .calc-key.eq { background: var(--primary); color: #fff; }
+    .calc-key.clr { background: var(--red-bg); color: var(--red); }
+    .empty-state { text-align: center; padding: 30px 14px; color: var(--muted); font-size: 14px; }
+    .hidden { display: none; }
+    .small-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="headerTitle">Tracop</h1>
+      <p>AI Operating System for Local Shops</p>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" onclick="openCalculator()" title="Calculator">🧮</button>
+      <button class="icon-btn" type="button" onclick="openSettings()" title="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <section id="tab-stock">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Items</div><div class="stat-value" id="statItems">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value" id="statUnits">0</div></div>
+        <div class="stat-card"><div class="stat-label">Stock Value</div><div class="stat-value" id="statValue">₹0</div></div>
+      </div>
+      <div class="card">
+        <div class="search-row">
+          <input type="text" id="searchInput" placeholder="Search item or category..." oninput="renderStock()" />
+          <button class="btn btn-success btn-sm" type="button" onclick="shareStockWhatsApp()">Share</button>
+        </div>
+        <div class="filter-row">
+          <button class="pill active" type="button" id="filterAll" onclick="setStockFilter('all')">All Stock</button>
+          <button class="pill" type="button" id="filterLow" onclick="setStockFilter('low')">Low Stock (≤5)</button>
+        </div>
+      </div>
+      <div id="stockList"></div>
+    </section>
+
+    <section id="tab-due" class="hidden">
+      <div class="card">
+        <div class="stat-label">Total Customer Due (বাকি / ধার)</div>
+        <div class="stat-value" id="totalDueAmount" style="font-size: 24px; color: var(--red); margin: 4px 0 10px;">₹0</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px;">
+          <input type="text" id="dueNameInput" placeholder="গ্রাহকের নাম / Name" />
+          <input type="number" id="dueAmtInput" placeholder="টাকা (₹)" min="1" />
+          <button class="btn btn-primary btn-sm" type="button" onclick="manualAddDue()">+ বাকি</button>
+        </div>
+      </div>
+      <div id="dueList"></div>
+    </section>
+
+    <section id="tab-voice" class="hidden">
+      <div class="card">
+        <div class="lang-row">
+          <button class="pill active" type="button" id="lang-bn" onclick="setLang('bn')">বাংলা (Bengali)</button>
+          <button class="pill" type="button" id="lang-en" onclick="setLang('en')">English (IN)</button>
+          <button class="pill" type="button" id="lang-hi" onclick="setLang('hi')">हिन्दी (Hindi)</button>
+        </div>
+        <div class="mic-wrap">
+          <button class="mic-btn" type="button" id="micBtn" onclick="toggleVoice()">🎤</button>
+          <p class="small-note" id="micStatus">মাইক ট্যাপ করে বলুন বা নিচে লিখুন</p>
+        </div>
+        <label for="voiceText" style="font-size: 12px; font-weight: 700; color: var(--muted);">Spoken / Typed Statement</label>
+        <textarea id="voiceText" rows="3" placeholder='যেমন: "10 kilo rice" বা "1 liter water bottles five piece"' style="margin-top: 6px; margin-bottom: 10px;"></textarea>
+        <button class="btn btn-primary" type="button" id="voiceSubmitBtn" onclick="processVoiceStatement()">✨ Update Stock / Due with AI</button>
+        <div id="voiceResult"></div>
+      </div>
+    </section>
+
+    <section id="tab-scan" class="hidden">
+      <div class="card">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Scan Product, Wholesale Bill or Due Slip</div>
+        <div class="mode-row">
+          <button class="pill active" type="button" id="modeStockBtn" onclick="setScanMode('stock')">📦 Stock / Wholesale Bill</button>
+          <button class="pill" type="button" id="modeDueBtn" onclick="setScanMode('due')">📒 Due Bill / Khata</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn btn-primary" type="button" onclick="triggerCamera()">📷 Camera</button>
+          <button class="btn btn-outline" type="button" onclick="triggerGallery()">🖼️ Gallery</button>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageFile(event)" />
+        <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageFile(event)" />
+        <img id="scanPreview" class="preview-img hidden" alt="Scanned preview" />
+        <div id="scanStatus"></div>
+        <div id="scanDraftArea"></div>
+      </div>
+    </section>
+
+    <section id="tab-history" class="hidden">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: 700; font-size: 15px;">Recent Activity</div>
+          <button class="btn btn-outline btn-sm" type="button" onclick="clearHistory()">Clear Log</button>
+        </div>
+      </div>
+      <div id="historyList"></div>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" type="button" id="nav-stock" onclick="switchTab('stock')"><span class="nav-icon">📦</span><span>Stock</span></button>
+    <button class="nav-btn" type="button" id="nav-due" onclick="switchTab('due')"><span class="nav-icon">📒</span><span>Due</span></button>
+    <button class="nav-btn" type="button" id="nav-voice" onclick="switchTab('voice')"><span class="nav-icon">🎤</span><span>Voice</span></button>
+    <button class="nav-btn" type="button" id="nav-scan" onclick="switchTab('scan')"><span class="nav-icon">📷</span><span>Scan</span></button>
+    <button class="nav-btn" type="button" id="nav-history" onclick="switchTab('history')"><span class="nav-icon">📋</span><span>History</span></button>
+  </nav>
+
+  <div class="modal-backdrop" id="calcModal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="font-size: 17px;">Calculator</h2>
+        <button class="btn btn-outline btn-sm" type="button" onclick="closeCalculator()">Close</button>
+      </div>
+      <div class="calc-display">
+        <div class="calc-expr" id="calcExpr"></div>
+        <div class="calc-val" id="calcVal">0</div>
+      </div>
+      <div class="calc-grid">
+        <button class="calc-key clr" type="button" onclick="calcClear()">C</button>
+        <button class="calc-key" type="button" onclick="calcBackspace()">⌫</button>
+        <button class="calc-key op" type="button" onclick="calcPercent()">%</button>
+        <button class="calc-key op" type="button" onclick="calcAppend('/')">÷</button>
+        <button class="calc-key" type="button" onclick="calcAppend('7')">7</button>
+        <button class="calc-key" type="button" onclick="calcAppend('8')">8</button>
+        <button class="calc-key" type="button" onclick="calcAppend('9')">9</button>
+        <button class="calc-key op" type="button" onclick="calcAppend('*')">×</button>
+        <button class="calc-key" type="button" onclick="calcAppend('4')">4</button>
+        <button class="calc-key" type="button" onclick="calcAppend('5')">5</button>
+        <button class="calc-key" type="button" onclick="calcAppend('6')">6</button>
+        <button class="calc-key op" type="button" onclick="calcAppend('-')">−</button>
+        <button class="calc-key" type="button" onclick="calcAppend('1')">1</button>
+        <button class="calc-key" type="button" onclick="calcAppend('2')">2</button>
+        <button class="calc-key" type="button" onclick="calcAppend('3')">3</button>
+        <button class="calc-key op" type="button" onclick="calcAppend('+')">+</button>
+        <button class="calc-key" style="grid-column: span 2;" type="button" onclick="calcAppend('0')">0</button>
+        <button class="calc-key" type="button" onclick="calcAppend('.')">.</button>
+        <button class="calc-key eq" type="button" onclick="calcEqual()">=</button>
+      </div>
+      <button class="btn btn-success" type="button" style="width: 100%; margin-top: 10px;" onclick="sendCalcToDue()">📒 Send Total to Due Amount</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-box">
+      <h2 style="font-size: 17px; margin-bottom: 12px;">Tracop Setup</h2>
+      <label style="font-size: 12px; font-weight: 700;">Shop Name</label>
+      <input type="text" id="cfgShopName" placeholder="e.g. Goswami Stores" style="margin: 6px 0 12px;" />
+      <label style="font-size: 12px; font-weight: 700;">Gemini API Key</label>
+      <input type="password" id="cfgApiKey" placeholder="AIza..." style="margin: 6px 0 14px;" />
+      <button class="btn btn-primary" type="button" onclick="saveSettings()" style="margin-bottom: 10px;">Save Setup</button>
+      <button class="btn btn-outline btn-sm" type="button" style="width: 100%;" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const MODEL_CHAIN = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+    const KEYS = { stock: "tracop_stock_v1", udhar: "tracop_udhar_v1", history: "tracop_history_v1", config: "tracop_config_v1" };
+
+    function safeReadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    let state = {
+      stock: safeReadJson(KEYS.stock, []),
+      udhar: safeReadJson(KEYS.udhar, []),
+      history: safeReadJson(KEYS.history, []),
+      config: safeReadJson(KEYS.config, { shopName: "", apiKey: "" }),
+      filter: "all",
+      lang: "bn",
+      scanMode: "stock"
+    };
+    if (!Array.isArray(state.stock)) state.stock = [];
+    if (!Array.isArray(state.udhar)) state.udhar = [];
+    if (!Array.isArray(state.history)) state.history = [];
+    if (!state.config || typeof state.config !== "object") state.config = { shopName: "", apiKey: "" };
+
+    let isProcessingVoice = false;
+
+    function normalizeUnit(u) {
+      const s = String(u || "pcs").trim().toLowerCase();
+      if (["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms", "কেজি"].includes(s)) return "kg";
+      if (["g", "gm", "gms", "gram", "grams", "গ্রাম"].includes(s)) return "g";
+      if (["l", "lt", "ltr", "ltrs", "liter", "liters", "litre", "litres", "লিটার"].includes(s)) return "l";
+      if (["ml", "mls", "milliliter", "milliliters", "millilitre", "মিলি"].includes(s)) return "ml";
+      return "pcs";
+    }
+
+    function formatQty(qty, unit) {
+      const n = Math.round(Number(qty || 0) * 1000) / 1000;
+      return `${n} ${normalizeUnit(unit)}`;
+    }
+
+    function saveAll() {
+      try {
+        localStorage.setItem(KEYS.stock, JSON.stringify(state.stock));
+        localStorage.setItem(KEYS.udhar, JSON.stringify(state.udhar));
+        localStorage.setItem(KEYS.history, JSON.stringify(state.history));
+        localStorage.setItem(KEYS.config, JSON.stringify(state.config));
+      } catch {}
+      applyHeader();
+    }
+
+    function applyHeader() {
+      const name = String(state.config.shopName || "").trim();
+      document.getElementById("headerTitle").textContent = name ? `Tracop · ${name}` : "Tracop";
+    }
+
+    function logHistory(text) {
+      state.history.unshift({ id: Date.now() + Math.random(), text, time: new Date().toLocaleString("en-IN") });
+      state.history = state.history.slice(0, 60);
+      saveAll();
+    }
+
+    function switchTab(tab) {
+      ["stock", "due", "voice", "scan", "history"].forEach((t) => {
+        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tab);
+        document.getElementById(`nav-${t}`).classList.toggle("active", t === tab);
+      });
+      if (tab === "stock") renderStock();
+      if (tab === "due") renderDue();
+      if (tab === "history") renderHistory();
+    }
+
+    function setStockFilter(f) {
+      state.filter = f;
+      document.getElementById("filterAll").classList.toggle("active", f === "all");
+      document.getElementById("filterLow").classList.toggle("active", f === "low");
+      renderStock();
+    }
+
+    function renderStock() {
+      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+      let items = state.stock.slice();
+      if (state.filter === "low") items = items.filter((i) => Number(i.qty) <= 5);
+      if (q) items = items.filter((i) => String(i.name || "").toLowerCase().includes(q) || String(i.category || "").toLowerCase().includes(q));
+
+      document.getElementById("statItems").textContent = state.stock.length;
+      const units = state.stock.reduce((s, i) => s + Number(i.qty || 0), 0);
+      const val = state.stock.reduce((s, i) => s + Number(i.qty || 0) * Number(i.price || 0), 0);
+      document.getElementById("statUnits").textContent = Math.round(units * 100) / 100;
+      document.getElementById("statValue").textContent = `₹${Math.round(val).toLocaleString("en-IN")}`;
+
+      const listEl = document.getElementById("stockList");
+      if (!items.length) {
+        listEl.innerHTML = `<div class="empty-state">No items yet.<br/>Tap 🎤 Voice or 📷 Scan to add stock.</div>`;
+        return;
+      }
+      listEl.innerHTML = items.map((item) => {
+        const unit = normalizeUnit(item.unit);
+        const low = Number(item.qty) <= 5;
+        return `
+          <div class="item-card ${low ? "low-stock" : ""}">
+            <div>
+              <div style="font-weight:700;font-size:15px;">${escapeHtml(item.name)}</div>
+              <span class="badge badge-cat">${escapeHtml(item.category || "General")}</span>
+              <span class="badge badge-cat">${escapeHtml(unit)}</span>
+              ${low ? `<span class="badge badge-low">Low Stock</span>` : ""}
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">₹${Number(item.price || 0)} / ${escapeHtml(unit)}</div>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" type="button" onclick="adjustQty('${item.id}', -1)">−</button>
+              <span class="qty-num">${escapeHtml(formatQty(item.qty, unit))}</span>
+              <button class="qty-btn" type="button" onclick="adjustQty('${item.id}', 1)">+</button>
+              <button class="qty-btn" type="button" style="color:var(--red);" onclick="deleteStockItem('${item.id}')">×</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function adjustQty(id, delta) {
+      const idx = state.stock.findIndex((i) => i.id === id);
+      if (idx === -1) return;
+      state.stock[idx].qty = Math.max(0, Math.round((Number(state.stock[idx].qty || 0) + delta) * 1000) / 1000);
+      saveAll();
+      renderStock();
+    }
+
+    function deleteStockItem(id) {
+      state.stock = state.stock.filter((i) => i.id !== id);
+      saveAll();
+      renderStock();
+    }
+
+    function shareStockWhatsApp() {
+      const lines = state.stock.map((i) => `• ${i.name}: ${formatQty(i.qty, i.unit)} @ ₹${i.price}`);
+      const msg = lines.length ? `Stock Update:\n${lines.join("\n")}` : "No stock items yet.";
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+
+    function upsertCustomerDue(name, amount, note = "", type = "due") {
+      const clean = String(name || "Customer").trim();
+      const amt = Math.abs(Number(amount || 0));
+      if (!amt) return null;
+      let cust = state.udhar.find((c) => String(c.name || "").toLowerCase() === clean.toLowerCase());
+      if (!cust) {
+        cust = { id: "c_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), name: clean, dueAmount: 0, entries: [] };
+        state.udhar.push(cust);
+      }
+      const change = type === "payment" ? Math.min(Number(cust.dueAmount || 0), amt) : amt;
+      cust.dueAmount = type === "payment" ? Math.max(0, Number(cust.dueAmount || 0) - amt) : Number(cust.dueAmount || 0) + amt;
+      cust.entries.unshift({ id: Date.now() + Math.random(), type, amount: change, note, date: new Date().toLocaleString("en-IN") });
+      saveAll();
+      return { cust, change };
+    }
+
+    function manualAddDue() {
+      const name = (document.getElementById("dueNameInput").value || "").trim();
+      const amt = Number(document.getElementById("dueAmtInput").value);
+      if (!name || !amt || amt <= 0) return;
+      upsertCustomerDue(name, amt, "Manual due", "due");
+      logHistory(`Due +₹${amt} for ${name}`);
+      document.getElementById("dueNameInput").value = "";
+      document.getElementById("dueAmtInput").value = "";
+      renderDue();
+    }
+
+    function quickDueAction(id, type) {
+      const cust = state.udhar.find((c) => c.id === id);
+      if (!cust) return;
+      const val = Number(prompt(type === "payment" ? `${cust.name} কত টাকা শোধ দিলেন?` : `${cust.name}-এর কত টাকা বাকি?`));
+      if (!val || val <= 0) return;
+      upsertCustomerDue(cust.name, val, type === "payment" ? "Payment" : "Credit", type);
+      renderDue();
+    }
+
+    function renderDue() {
+      const total = state.udhar.reduce((s, c) => s + Number(c.dueAmount || 0), 0);
+      document.getElementById("totalDueAmount").textContent = `₹${total.toLocaleString("en-IN")}`;
+      const listEl = document.getElementById("dueList");
+      if (!state.udhar.length) {
+        listEl.innerHTML = `<div class="empty-state">কোনো বাকি খাতা নেই।</div>`;
+        return;
+      }
+      listEl.innerHTML = state.udhar.map((c) => {
+        const amt = Number(c.dueAmount || 0);
+        return `
+          <div class="item-card" style="border-left-color:${amt > 0 ? "var(--amber)" : "var(--green)"};">
+            <div>
+              <div style="font-weight:700;font-size:15px;">${escapeHtml(c.name)}</div>
+              <span class="badge ${amt > 0 ? "badge-due" : "badge-clear"}">${amt > 0 ? "Pending Due" : "Cleared"}</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-weight:800;font-size:16px;color:${amt > 0 ? "var(--red)" : "var(--green)"};">₹${amt.toLocaleString("en-IN")}</div>
+              <div style="display:flex;gap:6px;margin-top:6px;">
+                <button class="btn btn-outline btn-sm" type="button" onclick="quickDueAction('${c.id}', 'due')">+ Due</button>
+                <button class="btn btn-success btn-sm" type="button" onclick="quickDueAction('${c.id}', 'payment')">Pay</button>
+              </div>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function setLang(lang) {
+      state.lang = lang;
+      ["bn", "en", "hi"].forEach((l) => document.getElementById(`lang-${l}`).classList.toggle("active", l === lang));
+    }
+
+    let recognition = null, isRecording = false, voiceAutoSubmitted = false;
+    function toggleVoice() {
+      if (isProcessingVoice) return;
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        document.getElementById("micStatus").textContent = "নিচে লিখে আপডেট করুন";
+        return;
+      }
+      const btn = document.getElementById("micBtn");
+      const st = document.getElementById("micStatus");
+      if (isRecording && recognition) { recognition.stop(); return; }
+      voiceAutoSubmitted = false;
+      recognition = new SR();
+      recognition.lang = state.lang === "bn" ? "bn-IN" : state.lang === "hi" ? "hi-IN" : "en-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => { isRecording = true; btn.classList.add("recording"); st.textContent = "শুনছি..."; };
+      recognition.onresult = (e) => {
+        const t = e.results?.[0]?.[0]?.transcript || "";
+        if (t.trim()) { document.getElementById("voiceText").value = t.trim(); st.textContent = "কথা ধরা হয়েছে"; }
+      };
+      recognition.onend = () => {
+        isRecording = false; btn.classList.remove("recording");
+        if (!voiceAutoSubmitted && !isProcessingVoice && (document.getElementById("voiceText").value || "").trim()) {
+          voiceAutoSubmitted = true;
+          processVoiceStatement();
+        }
+      };
+      recognition.onerror = () => { isRecording = false; btn.classList.remove("recording"); st.textContent = "আবার চেষ্টা করুন বা নিচে লিখুন"; };
+      recognition.start();
+    }
+
+    function applyStockChange(item) {
+      const name = String(item.name || "").trim();
+      if (!name) return null;
+      const delta = Number(item.qty_delta || 0);
+      const price = Number(item.unit_price || 0);
+      const unit = normalizeUnit(item.unit);
+      const existing = state.stock.find((s) => String(s.name || "").toLowerCase() === name.toLowerCase() && normalizeUnit(s.unit) === unit);
+      if (existing) {
+        existing.qty = Math.max(0, Math.round((Number(existing.qty || 0) + delta) * 1000) / 1000);
+        existing.unit = unit;
+        if (price > 0) existing.price = price;
+        return `${existing.name} (${formatQty(existing.qty, unit)})`;
+      }
+      const q0 = Math.max(0, Math.round(delta * 1000) / 1000);
+      state.stock.push({ id: "s_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), name, qty: q0, unit, price, category: item.category || "General" });
+      return `${name} (+${formatQty(q0, unit)})`;
+    }
+
+    async function callGemini(parts, schema) {
+      const key = String(state.config.apiKey || "").trim();
+      if (!key) throw new Error("API key missing");
+      let lastErr = null;
+      for (const model of MODEL_CHAIN) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json", responseSchema: schema } })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              const msg = data.error?.message || `HTTP ${res.status}`;
+              lastErr = new Error(msg);
+              if (attempt < 2 && (res.status === 429 || res.status === 503 || res.status >= 500)) {
+                await new Promise((r) => setTimeout(r, 1000));
+                continue;
+              }
+              break;
+            }
+            return JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || "{}");
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+      }
+      throw lastErr || new Error("Request failed");
+    }
+
+    async function processVoiceStatement() {
+      if (isProcessingVoice) return;
+      const ta = document.getElementById("voiceText");
+      const stmt = (ta.value || "").trim();
+      const out = document.getElementById("voiceResult");
+      if (!stmt) { out.innerHTML = `<div class="banner banner-err">আগে কিছু বলুন বা লিখুন।</div>`; return; }
+      if (!state.config.apiKey) { openSettings(); return; }
+
+      isProcessingVoice = true;
+      const btn = document.getElementById("voiceSubmitBtn");
+      btn.disabled = true;
+      out.innerHTML = `<div class="banner banner-info">AI বিশ্লেষণ করছে...</div>`;
+
+      const prompt = `Parse shopkeeper statement ONCE without duplicates. Units must be one of ["pcs","kg","g","l","ml"].
+Examples: "10 kilo rice" -> name:"Rice", qty_delta:10, unit:"kg". "1 liter water bottles five piece" -> name:"1L Water Bottle", qty_delta:5, unit:"pcs". "500 ml water bottle three piece" -> name:"500ml Water Bottle", qty_delta:3, unit:"pcs".
+Statement: "${stmt}"`;
+
+      const schema = {
+        type: "OBJECT",
+        properties: {
+          stock_changes: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING" },
+                qty_delta: { type: "NUMBER" },
+                unit: { type: "STRING", enum: ["pcs", "kg", "g", "l", "ml"] },
+                unit_price: { type: "NUMBER" },
+                category: { type: "STRING" }
+              },
+              required: ["name", "qty_delta", "unit"]
+            }
+          },
+          udhar_changes: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                action: { type: "STRING", enum: ["udhar_add", "udhar_pay"] },
+                customer_name: { type: "STRING" },
+                amount: { type: "NUMBER" }
+              },
+              required: ["action", "customer_name", "amount"]
+            }
+          }
+        },
+        required: ["stock_changes", "udhar_changes"]
+      };
+
+      try {
+        const parsed = await callGemini([{ text: prompt }], schema);
+        const notes = [];
+        (parsed.stock_changes || []).forEach((sc) => { const m = applyStockChange(sc); if (m) notes.push(`📦 ${m}`); });
+        (parsed.udhar_changes || []).forEach((uc) => {
+          const r = upsertCustomerDue(uc.customer_name, uc.amount, stmt, uc.action === "udhar_pay" ? "payment" : "due");
+          if (r) notes.push(`📒 ${r.cust.name}: Due ₹${r.cust.dueAmount}`);
+        });
+        saveAll();
+        if (notes.length) {
+          ta.value = "";
+          logHistory(notes.join(" | "));
+          out.innerHTML = `<div class="banner banner-ok">✅ ${notes.join("\n")}</div>`;
+        } else {
+          out.innerHTML = `<div class="banner banner-err">কোনো তথ্য পাওয়া যায়নি।</div>`;
+        }
+      } catch (e) {
+        out.innerHTML = `<div class="banner banner-err">⚠️ ${escapeHtml(e.message)}</div>`;
+      } finally {
+        isProcessingVoice = false;
+        btn.disabled = false;
+      }
+    }
+
+    function setScanMode(m) {
+      state.scanMode = m;
+      document.getElementById("modeStockBtn").classList.toggle("active", m === "stock");
+      document.getElementById("modeDueBtn").classList.toggle("active", m === "due");
+      document.getElementById("scanDraftArea").innerHTML = "";
+    }
+    function triggerCamera() { document.getElementById("cameraInput").click(); }
+    function triggerGallery() { document.getElementById("galleryInput").click(); }
+
+    function handleImageFile(ev) {
+      const file = ev.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.getElementById("scanPreview");
+        img.src = reader.result;
+        img.classList.remove("hidden");
+        const im = new Image();
+        im.onload = () => {
+          const maxW = 1024, sc = im.width > maxW ? maxW / im.width : 1;
+          const c = document.createElement("canvas");
+          c.width = Math.round(im.width * sc);
+          c.height = Math.round(im.height * sc);
+          c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+          runScan(c.toDataURL("image/jpeg", 0.82).split(",")[1]);
+        };
+        im.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+      ev.target.value = "";
+    }
+
+    async function runScan(b64) {
+      if (!state.config.apiKey) { openSettings(); return; }
+      const st = document.getElementById("scanStatus");
+      const dr = document.getElementById("scanDraftArea");
+      dr.innerHTML = "";
+      st.innerHTML = `<div class="banner banner-info">ছবি দেখা হচ্ছে...</div>`;
+      const isDue = state.scanMode === "due";
+      const schema = isDue
+        ? { type: "OBJECT", properties: { entries: { type: "ARRAY", items: { type: "OBJECT", properties: { customer_name: { type: "STRING" }, amount: { type: "NUMBER" }, entry_type: { type: "STRING", enum: ["due", "payment"] } }, required: ["customer_name", "amount", "entry_type"] } } }, required: ["entries"] }
+        : { type: "OBJECT", properties: { items: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, qty: { type: "NUMBER" }, unit: { type: "STRING", enum: ["pcs", "kg", "g", "l", "ml"] }, unit_price: { type: "NUMBER" } }, required: ["name", "qty", "unit", "unit_price"] } } }, required: ["items"] };
+      try {
+        const parsed = await callGemini([{ text: isDue ? "Extract customer due entries." : "Extract items with unit in [pcs,kg,g,l,ml]." }, { inlineData: { mimeType: "image/jpeg", data: b64 } }], schema);
+        if (isDue) {
+          const entries = parsed.entries || [];
+          st.innerHTML = `<div class="banner banner-ok">Found ${entries.length} due entry(s):</div>`;
+          dr.innerHTML = entries.map((e, i) => `<div class="card" style="padding:10px;margin-bottom:8px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:6px;"><input type="text" id="dn_${i}" value="${escapeAttr(e.customer_name)}" /><input type="number" id="da_${i}" value="${Number(e.amount || 0)}" /><select id="dt_${i}"><option value="due">+ Due</option><option value="payment" ${e.entry_type === "payment" ? "selected" : ""}>- Pay</option></select></div>`).join("") + `<button class="btn btn-success" type="button" style="width:100%;" onclick="saveDueDraft(${entries.length})">Save Due</button>`;
+        } else {
+          const items = parsed.items || [];
+          st.innerHTML = `<div class="banner banner-ok">Found ${items.length} item(s):</div>`;
+          dr.innerHTML = items.map((it, i) => {
+            const u = normalizeUnit(it.unit);
+            return `<div class="card" style="padding:10px;margin-bottom:8px;display:grid;grid-template-columns:1.5fr 0.7fr 0.7fr 0.8fr;gap:6px;"><input type="text" id="sn_${i}" value="${escapeAttr(it.name)}" /><input type="number" step="any" id="sq_${i}" value="${Number(it.qty || 1)}" /><select id="su_${i}"><option value="pcs" ${u==="pcs"?"selected":""}>pcs</option><option value="kg" ${u==="kg"?"selected":""}>kg</option><option value="g" ${u==="g"?"selected":""}>g</option><option value="l" ${u==="l"?"selected":""}>l</option><option value="ml" ${u==="ml"?"selected":""}>ml</option></select><input type="number" id="sp_${i}" value="${Number(it.unit_price || 0)}" /></div>`;
+          }).join("") + `<button class="btn btn-success" type="button" style="width:100%;" onclick="saveStockDraft(${items.length})">Save Stock</button>`;
+        }
+      } catch (e) {
+        st.innerHTML = `<div class="banner banner-err">⚠️ ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    function saveStockDraft(n) {
+      for (let i = 0; i < n; i++) {
+        const name = (document.getElementById(`sn_${i}`)?.value || "").trim();
+        const qty = Number(document.getElementById(`sq_${i}`)?.value || 0);
+        const unit = normalizeUnit(document.getElementById(`su_${i}`)?.value || "pcs");
+        const price = Number(document.getElementById(`sp_${i}`)?.value || 0);
+        if (name && qty > 0) applyStockChange({ name, qty_delta: qty, unit, unit_price: price });
+      }
+      saveAll();
+      document.getElementById("scanDraftArea").innerHTML = "";
+      document.getElementById("scanStatus").innerHTML = `<div class="banner banner-ok">✅ Saved to Stock!</div>`;
+      renderStock();
+    }
+
+    function saveDueDraft(n) {
+      for (let i = 0; i < n; i++) {
+        const name = (document.getElementById(`dn_${i}`)?.value || "").trim();
+        const amt = Number(document.getElementById(`da_${i}`)?.value || 0);
+        const tp = document.getElementById(`dt_${i}`)?.value || "due";
+        if (name && amt > 0) upsertCustomerDue(name, amt, "Scanned due", tp);
+      }
+      saveAll();
+      document.getElementById("scanDraftArea").innerHTML = "";
+      document.getElementById("scanStatus").innerHTML = `<div class="banner banner-ok">✅ Saved to Due!</div>`;
+      renderDue();
+    }
+
+    let cExpr = "", cVal = "0";
+    function openCalculator() { document.getElementById("calcModal").classList.add("open"); updCalc(); }
+    function closeCalculator() { document.getElementById("calcModal").classList.remove("open"); }
+    function updCalc() { document.getElementById("calcExpr").textContent = cExpr; document.getElementById("calcVal").textContent = cVal; }
+    function calcClear() { cExpr = ""; cVal = "0"; updCalc(); }
+    function calcBackspace() { cVal = cVal.length > 1 ? cVal.slice(0, -1) : "0"; updCalc(); }
+    function calcAppend(ch) {
+      if (["+","-","*","/"].includes(ch)) { cExpr = (cExpr && /[+\-*/]$/.test(cExpr) ? cExpr.slice(0,-1) : (cExpr ? cExpr + cVal : cVal)) + ch; cVal = "0"; }
+      else if (ch === ".") { if (!cVal.includes(".")) cVal += "."; }
+      else cVal = cVal === "0" ? ch : cVal + ch;
+      updCalc();
+    }
+    function calcPercent() { const n = Number(cVal); if (!Number.isNaN(n)) { cVal = String(Math.round((n/100)*10000)/10000); updCalc(); } }
+    function calcEqual() {
+      const full = cExpr + cVal;
+      if (!/^[0-9+\-*/.() ]+$/.test(full)) return;
+      try { const r = Function(`"use strict"; return (${full});`)(); if (typeof r === "number" && Number.isFinite(r)) { cExpr = full + " ="; cVal = String(Math.round(r*10000)/10000); updCalc(); } } catch {}
+    }
+    function sendCalcToDue() {
+      calcEqual();
+      const v = Number(cVal);
+      if (v > 0) { document.getElementById("dueAmtInput").value = Math.round(v); closeCalculator(); switchTab("due"); }
+    }
+
+    function renderHistory() {
+      document.getElementById("historyList").innerHTML = state.history.length
+        ? state.history.map((h) => `<div class="card" style="padding:10px 14px;margin-bottom:8px;"><div style="font-size:13px;font-weight:600;">${escapeHtml(h.text)}</div><div style="font-size:11px;color:var(--muted);">${escapeHtml(h.time)}</div></div>`).join("")
+        : `<div class="empty-state">No activity logged yet.</div>`;
+    }
+    function clearHistory() { state.history = []; saveAll(); renderHistory(); }
+    function openSettings() { document.getElementById("cfgShopName").value = state.config.shopName || ""; document.getElementById("cfgApiKey").value = state.config.apiKey || ""; document.getElementById("settingsModal").classList.add("open"); }
+    function closeSettings() { document.getElementById("settingsModal").classList.remove("open"); }
+    function saveSettings() {
+      state.config.shopName = (document.getElementById("cfgShopName").value || "").trim();
+      state.config.apiKey = (document.getElementById("cfgApiKey").value || "").trim();
+      saveAll(); closeSettings(); renderStock();
+    }
+    function escapeHtml(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+    function escapeAttr(s) { return escapeHtml(s).replace(/'/g,"&#39;"); }
+
+    applyHeader();
+    renderStock();
+  </script>
+</body>
+</html>
