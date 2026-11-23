@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracop — AI Operating System for Local Shops</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-dark: #1e3a8a;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --red: #dc2626;
+      --red-bg: #fee2e2;
+      --amber: #d97706;
+      --amber-bg: #fef3c7;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 84px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, var(--primary));
+      color: #ffffff;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+    }
+
+    header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
+    header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.16);
+      border: none;
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .container { max-width: 640px; margin: 0 auto; padding: 14px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .stat-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; color: var(--text); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+
+    input[type="text"], input[type="number"], input[type="password"], textarea, select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: var(--primary); color: #ffffff; width: 100%; }
+    .btn-success { background: var(--green); color: #ffffff; }
+    .btn-danger { background: var(--red); color: #ffffff; }
+    .btn-outline { background: #ffffff; color: var(--text); border: 1px solid #cbd5e1; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+    .filter-row, .lang-row, .mode-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pill.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .item-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-card.low-stock {
+      border-left-color: var(--red);
+      background: #fffafa;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+      margin-right: 4px;
+    }
+
+    .badge-cat { background: #dbeafe; color: var(--primary-dark); }
+    .badge-low { background: var(--red-bg); color: var(--red); }
+    .badge-due { background: var(--amber-bg); color: #92400e; }
+    .badge-clear { background: var(--green-bg); color: var(--green); }
+
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .qty-num { min-width: 34px; text-align: center; font-weight: 800; font-size: 15px; }
+
+    .mic-wrap { text-align: center; margin: 12px 0; }
+    .mic-btn {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.3);
+    }
+
+    .mic-btn.recording { background: var(--red); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .banner {
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .banner-ok { background: var(--green-bg); color: #14532d; border: 1px solid #86efac; }
+    .banner-err { background: var(--red-bg); color: #7f1d1d; border: 1px solid #fca5a5; }
+    .banner-info { background: #eff6ff; color: #1e3a8a; border: 1px solid #bfdbfe; }
+
+    .preview-img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #0f172a;
+      margin: 10px 0;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 6px 4px;
+      z-index: 20;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 2px;
+    }
+
+    .nav-btn.active { color: var(--primary); font-weight: 800; }
+    .nav-icon { font-size: 18px; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+
+    .empty-state { text-align: center; padding: 30px 14px; color: var(--muted); font-size: 14px; }
+    .hidden { display: none; }
+    .small-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1 id="headerTitle">Tracop</h1>
+      <p id="headerSub">AI Operating System for Local Shops</p>
+    </div>
+    <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+  </header>
+
+  <div class="container">
+    <!-- TAB 1: STOCK -->
+    <section id="tab-stock">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Items</div>
+          <div class="stat-value" id="statItems">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Units</div>
+          <div class="stat-value" id="statUnits">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Stock Value</div>
+          <div class="stat-value" id="statValue">₹0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="search-row">
+          <input type="text" id="searchInput" placeholder="Search item or category..." oninput="renderStock()" />
+          <button class="btn btn-success btn-sm" onclick="shareStockWhatsApp()">Share</button>
+        </div>
+        <div class="filter-row">
+          <button class="pill active" id="filterAll" onclick="setStockFilter('all')">All Stock</button>
+          <button class="pill" id="filterLow" onclick="setStockFilter('low')">Low Stock (≤5)</button>
+        </div>
+      </div>
+
+      <div id="stockList"></div>
+    </section>
+
+    <!-- TAB 2: DUE / UDHAR -->
+    <section id="tab-due" class="hidden">
+      <div class="card">
+        <div class="stat-label">Total Customer Due (বাকি / ধার)</div>
+        <div class="stat-value" id="totalDueAmount" style="font-size: 24px; color: var(--red); margin: 4px 0 10px;">₹0</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px;">
+          <input type="text" id="dueNameInput" placeholder="গ্রাহকের নাম / Name" />
+          <input type="number" id="dueAmtInput" placeholder="টাকা (₹)" min="1" />
+          <button class="btn btn-primary btn-sm" onclick="manualAddDue()">+ বাকি</button>
+        </div>
+        <p class="small-note">ভয়েস বা Scan থেকেও সরাসরি বাকি ও জমা আপডেট করতে পারেন।</p>
+      </div>
+
+      <div id="dueList"></div>
+    </section>
+
+    <!-- TAB 3: VOICE -->
+    <section id="tab-voice" class="hidden">
+      <div class="card">
+        <div class="lang-row">
+          <button class="pill active" id="lang-bn" onclick="setLang('bn')">বাংলা (Bengali)</button>
+          <button class="pill" id="lang-en" onclick="setLang('en')">English (IN)</button>
+          <button class="pill" id="lang-hi" onclick="setLang('hi')">हिन्दी (Hindi)</button>
+        </div>
+
+        <div class="mic-wrap">
+          <button class="mic-btn" id="micBtn" onclick="toggleVoice()">🎤</button>
+          <p class="small-note" id="micStatus">মাইক ট্যাপ করে বলুন বা নিচে লিখুন</p>
+        </div>
+
+        <label for="voiceText" style="font-size: 12px; font-weight: 700; color: var(--muted);">Spoken / Typed Statement</label>
+        <textarea id="voiceText" rows="3" placeholder='যেমন: "আজকে ৫০ পিস ৪৫ টাকার কোলগেট কিনেছি" বা "রহিম কাকার ৪৫০ টাকা বাকি"' style="margin-top: 6px; margin-bottom: 10px;"></textarea>
+
+        <button class="btn btn-primary" id="voiceSubmitBtn" onclick="processVoiceStatement()">✨ Update Stock / Due with AI</button>
+        <div id="voiceResult"></div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px;">Try saying (Stock & Udhar):</div>
+        <p class="small-note">
+          • "আজকে ৫০ পিস ৪৫ টাকার কোলগেট টুথপেস্ট কিনেছি"<br/>
+          • "৫টা কুরকুরে বিক্রি করেছি"<br/>
+          • "রহিম কাকার ৪৫০ টাকা বাকি থাকল"<br/>
+          • "রহিম কাকা আজ ২০০ টাকা শোধ করল"
+        </p>
+      </div>
+    </section>
+
+    <!-- TAB 4: SCAN -->
+    <section id="tab-scan" class="hidden">
+      <div class="card">
+        <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Scan Product, Wholesale Bill or Due Slip</div>
+        <p class="small-note" style="margin-top: 0; margin-bottom: 10px;">
+          দোকানের মাল বা পাইকারি বিল অথবা গ্রাহকের বাকি খাতা/রসিদের ছবি তুলে অটো লোড করুন।
+        </p>
+
+        <div class="mode-row">
+          <button class="pill active" id="modeStockBtn" onclick="setScanMode('stock')">📦 Stock / Wholesale Bill</button>
+          <button class="pill" id="modeDueBtn" onclick="setScanMode('due')">📒 Due Bill / Khata</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="btn btn-primary" onclick="triggerCamera('environment')">📷 Camera</button>
+          <button class="btn btn-outline" onclick="triggerGallery()">🖼️ Gallery</button>
+        </div>
+
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageFile(event)" />
+        <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageFile(event)" />
+
+        <img id="scanPreview" class="preview-img hidden" alt="Scanned preview" />
+        <div id="scanStatus"></div>
+        <div id="scanDraftArea"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: HISTORY -->
+    <section id="tab-history" class="hidden">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: 700; font-size: 15px;">Recent Activity</div>
+          <button class="btn btn-outline btn-sm" onclick="clearHistory()">Clear Log</button>
+        </div>
+      </div>
+      <div id="historyList"></div>
+    </section>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-stock" onclick="switchTab('stock')">
+      <span class="nav-icon">📦</span>
+      <span>Stock</span>
+    </button>
+    <button class="nav-btn" id="nav-due" onclick="switchTab('due')">
+      <span class="nav-icon">📒</span>
+      <span>Due</span>
+    </button>
+    <button class="nav-btn" id="nav-voice" onclick="switchTab('voice')">
+      <span class="nav-icon">🎤</span>
+      <span>Voice</span>
+    </button>
+    <button class="nav-btn" id="nav-scan" onclick="switchTab('scan')">
+      <span class="nav-icon">📷</span>
+      <span>Scan</span>
+    </button>
+    <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+      <span class="nav-icon">📋</span>
+      <span>History</span>
+    </button>
+  </nav>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-box">
+      <h2 style="font-size: 17px; margin-bottom: 12px;">Tracop Setup</h2>
+      <label style="font-size: 12px; font-weight: 700;">Shop Name</label>
+      <input type="text" id="cfgShopName" placeholder="e.g. Goswami Stores" style="margin: 6px 0 12px;" />
+
+      <label style="font-size: 12px; font-weight: 700;">Gemini API Key</label>
+      <input type="password" id="cfgApiKey" placeholder="AIza..." style="margin: 6px 0 14px;" />
+
+      <button class="btn btn-primary" onclick="saveSettings()" style="margin-bottom: 10px;">Save Setup</button>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+        <button class="btn btn-outline btn-sm" onclick="resetStockOnly()">Reset Stock</button>
+        <button class="btn btn-outline btn-sm" onclick="closeSettings()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER LEDGER MODAL -->
+  <div class="modal-backdrop" id="ledgerModal">
+    <div class="modal-box" id="ledgerModalContent"></div>
+  </div>
+
+  <script>
+    const MODEL_CHAIN = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+    const KEYS = {
+      stock: "tracop_stock_v1",
+      udhar: "tracop_udhar_v1",
+      history: "tracop_history_v1",
+      config: "tracop_config_v1"
+    };
+
+    let state = {
+      stock: JSON.parse(localStorage.getItem(KEYS.stock) || "[]"),
+      udhar: JSON.parse(localStorage.getItem(KEYS.udhar) || "[]"),
+      history: JSON.parse(localStorage.getItem(KEYS.history) || "[]"),
+      config: JSON.parse(localStorage.getItem(KEYS.config) || '{"shopName":"","apiKey":""}'),
+      filter: "all",
+      lang: "bn",
+      scanMode: "stock"
+    };
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function callGeminiWithFallback(apiKey, parts, responseSchema, onStatus) {
+      let lastError = null;
+
+      for (const model of MODEL_CHAIN) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            if (onStatus && (model !== MODEL_CHAIN[0] || attempt > 1)) {
+              onStatus("সার্ভার একটু ব্যস্ত, আবার চেষ্টা করছি...");
+            }
+
+            const res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  contents: [{ parts }],
+                  generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema
+                  }
+                })
+              }
+            );
+
+            const data = await res.json();
+            if (!res.ok) {
+              const msg = data.error?.message || `HTTP ${res.status}`;
+              const isSpike =
+                res.status === 429 ||
+                res.status === 503 ||
+                res.status >= 500 ||
+                /high demand|overloaded|quota|unavailable/i.test(msg);
+
+              lastError = new Error(msg);
+              if (isSpike && attempt < 2) {
+                await sleep(1100 * attempt);
+                continue;
+              }
+              if (isSpike) {
+                break; // move to next model in fallback chain
+              }
+              throw lastError;
+            }
+
+            const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+            return JSON.parse(rawText);
+          } catch (err) {
+            lastError = err;
+            if (attempt < 2) {
+              await sleep(1000);
+              continue;
+            }
+          }
+        }
+      }
+
+      throw lastError || new Error("সার্ভার সাময়িকভাবে ব্যস্ত। একটু পরে আবার চেষ্টা করুন।");
+    }
+
+    function saveAll() {
+      localStorage.setItem(KEYS.stock, JSON.stringify(state.stock));
+      localStorage.setItem(KEYS.udhar, JSON.stringify(state.udhar));
+      localStorage.setItem(KEYS.history, JSON.stringify(state.history));
+      localStorage.setItem(KEYS.config, JSON.stringify(state.config));
+      applyHeader();
+    }
+
+    function applyHeader() {
+      const name = (state.config.shopName || "").trim();
+      document.getElementById("headerTitle").textContent = name ? `Tracop · ${name}` : "Tracop";
+    }
+
+    function logHistory(text) {
+      state.history.unshift({
+        id: Date.now() + Math.random(),
+        text,
+        time: new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+      });
+      state.history = state.history.slice(0, 80);
+      saveAll();
+    }
+
+    function switchTab(tab) {
+      ["stock", "due", "voice", "scan", "history"].forEach((t) => {
+        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tab);
+        document.getElementById(`nav-${t}`).classList.toggle("active", t === tab);
+      });
+      if (tab === "stock") renderStock();
+      if (tab === "due") renderDue();
+      if (tab === "history") renderHistory();
+    }
+
+    function setStockFilter(f) {
+      state.filter = f;
+      document.getElementById("filterAll").classList.toggle("active", f === "all");
+      document.getElementById("filterLow").classList.toggle("active", f === "low");
+      renderStock();
+    }
+
+    function renderStock() {
+      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+      let items = state.stock.slice();
+      if (state.filter === "low") items = items.filter((i) => Number(i.qty) <= 5);
+      if (q) {
+        items = items.filter(
+          (i) => i.name.toLowerCase().includes(q) || (i.category || "").toLowerCase().includes(q)
+        );
+      }
+
+      const totalItems = state.stock.length;
+      const totalUnits = state.stock.reduce((sum, i) => sum + Number(i.qty || 0), 0);
+      const totalValue = state.stock.reduce((sum, i) => sum + Number(i.qty || 0) * Number(i.price || 0), 0);
+
+      document.getElementById("statItems").textContent = totalItems;
+      document.getElementById("statUnits").textContent = totalUnits;
+      document.getElementById("statValue").textContent = `₹${totalValue.toLocaleString("en-IN")}`;
+
+      const listEl = document.getElementById("stockList");
+      if (!items.length) {
+        listEl.innerHTML = `<div class="empty-state">No items yet.<br/>Tap 🎤 Voice or 📷 Scan below to add stock!</div>`;
+        return;
+      }
+
+      listEl.innerHTML = items
+        .map((item) => {
+          const isLow = Number(item.qty) <= 5;
+          return `
+            <div class="item-card ${isLow ? "low-stock" : ""}">
+              <div>
+                <div style="font-weight: 700; font-size: 15px;">${escapeHtml(item.name)}</div>
+                <span class="badge badge-cat">${escapeHtml(item.category || "General")}</span>
+                ${isLow ? `<span class="badge badge-low">Low Stock</span>` : ""}
+                <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">₹${Number(item.price || 0)} each</div>
+              </div>
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="adjustQty('${item.id}', -1)">−</button>
+                <span class="qty-num">${Number(item.qty)}</span>
+                <button class="qty-btn" onclick="adjustQty('${item.id}', 1)">+</button>
+                <button class="qty-btn" style="color: var(--red);" onclick="deleteStockItem('${item.id}')">×</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function adjustQty(id, delta) {
+      const idx = state.stock.findIndex((i) => i.id === id);
+      if (idx === -1) return;
+      state.stock[idx].qty = Math.max(0, Number(state.stock[idx].qty || 0) + delta);
+      saveAll();
+      renderStock();
+    }
+
+    function deleteStockItem(id) {
+      const item = state.stock.find((i) => i.id === id);
+      state.stock = state.stock.filter((i) => i.id !== id);
+      if (item) logHistory(`Removed ${item.name} from stock`);
+      saveAll();
+      renderStock();
+    }
+
+    function shareStockWhatsApp() {
+      const lines = state.stock.map((i) => `• ${i.name}: ${i.qty} pcs @ ₹${i.price}`);
+      const msg = lines.length ? `Stock Update:\n${lines.join("\n")}` : "No stock items yet.";
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+
+    // --- UDHAR / DUE LEDGER ---
+    function upsertCustomerDue(name, deltaDue, note = "", type = "due") {
+      const cleanName = (name || "Customer").trim();
+      const amount = Math.abs(Number(deltaDue || 0));
+      if (!amount) return null;
+
+      let cust = state.udhar.find((c) => c.name.toLowerCase() === cleanName.toLowerCase());
+      if (!cust) {
+        cust = {
+          id: "cust_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          name: cleanName,
+          dueAmount: 0,
+          entries: []
+        };
+        state.udhar.push(cust);
+      }
+
+      let actualChange = 0;
+      if (type === "payment") {
+        actualChange = Math.min(Number(cust.dueAmount || 0), amount);
+        cust.dueAmount = Math.max(0, Number(cust.dueAmount || 0) - amount);
+      } else {
+        actualChange = amount;
+        cust.dueAmount = Number(cust.dueAmount || 0) + amount;
+      }
+
+      cust.entries.unshift({
+        id: Date.now() + Math.random(),
+        type,
+        amount: actualChange,
+        note: note || (type === "payment" ? "Payment received" : "Credit added"),
+        date: new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+      });
+
+      saveAll();
+      return { cust, actualChange };
+    }
+
+    function manualAddDue() {
+      const name = document.getElementById("dueNameInput").value.trim();
+      const amt = Number(document.getElementById("dueAmtInput").value);
+      if (!name || !amt || amt <= 0) {
+        alert("গ্রাহকের নাম এবং টাকার পরিমাণ দিন।");
+        return;
+      }
+      upsertCustomerDue(name, amt, "Manual due entry", "due");
+      logHistory(`Due +₹${amt} added for ${name}`);
+      document.getElementById("dueNameInput").value = "";
+      document.getElementById("dueAmtInput").value = "";
+      renderDue();
+    }
+
+    function quickDueAction(id, type) {
+      const cust = state.udhar.find((c) => c.id === id);
+      if (!cust) return;
+      const promptMsg =
+        type === "payment"
+          ? `${cust.name} কত টাকা শোধ/জমা দিলেন? (Current due: ₹${cust.dueAmount})`
+          : `${cust.name}-এর নতুন কত টাকা বাকি হলো?`;
+      const val = Number(prompt(promptMsg));
+      if (!val || val <= 0) return;
+
+      const res = upsertCustomerDue(cust.name, val, type === "payment" ? "Quick payment" : "Quick credit", type);
+      if (res) {
+        logHistory(
+          type === "payment"
+            ? `Due -₹${res.actualChange} received from ${cust.name}`
+            : `Due +₹${res.actualChange} added for ${cust.name}`
+        );
+      }
+      renderDue();
+    }
+
+    function settleFullDue(id) {
+      const cust = state.udhar.find((c) => c.id === id);
+      if (!cust || Number(cust.dueAmount || 0) <= 0) return;
+      const settled = Number(cust.dueAmount);
+      upsertCustomerDue(cust.name, settled, "Full due settled", "payment");
+      logHistory(`Settled full due ₹${settled} for ${cust.name}`);
+      renderDue();
+    }
+
+    function openLedger(id) {
+      const cust = state.udhar.find((c) => c.id === id);
+      if (!cust) return;
+      const rows = (cust.entries || [])
+        .map(
+          (e) => `
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 13px;">
+            <div>
+              <div style="font-weight: 700;">${e.type === "payment" ? "💚 জমা / শোধ" : "🔴 বাকি / ধার"} · ₹${Number(e.amount)}</div>
+              <div style="font-size: 11px; color: var(--muted);">${escapeHtml(e.note)} · ${escapeHtml(e.date)}</div>
+            </div>
+          </div>`
+        )
+        .join("");
+
+      document.getElementById("ledgerModalContent").innerHTML = `
+        <h3 style="font-size: 16px; margin-bottom: 4px;">${escapeHtml(cust.name)}</h3>
+        <div style="font-size: 14px; font-weight: 800; color: ${cust.dueAmount > 0 ? "var(--red)" : "var(--green)"}; margin-bottom: 12px;">
+          Current Due: ₹${Number(cust.dueAmount || 0).toLocaleString("en-IN")}
+        </div>
+        <div style="margin-bottom: 12px;">${rows || `<div class="small-note">No entries yet.</div>`}</div>
+        <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="closeLedger()">Close</button>
+      `;
+      document.getElementById("ledgerModal").classList.add("open");
+    }
+
+    function closeLedger() {
+      document.getElementById("ledgerModal").classList.remove("open");
+    }
+
+    function renderDue() {
+      const totalDue = state.udhar.reduce((s, c) => s + Number(c.dueAmount || 0), 0);
+      document.getElementById("totalDueAmount").textContent = `₹${totalDue.toLocaleString("en-IN")}`;
+
+      const listEl = document.getElementById("dueList");
+      if (!state.udhar.length) {
+        listEl.innerHTML = `<div class="empty-state">কোনো বাকি খাতা নেই।<br/>উপরে নাম ও টাকা লিখুন বা Voice / Scan ব্যবহার করুন।</div>`;
+        return;
+      }
+
+      const sorted = state.udhar.slice().sort((a, b) => Number(b.dueAmount || 0) - Number(a.dueAmount || 0));
+      listEl.innerHTML = sorted
+        .map((c) => {
+          const amt = Number(c.dueAmount || 0);
+          return `
+            <div class="item-card" style="border-left-color: ${amt > 0 ? "var(--amber)" : "var(--green)"}; flex-direction: column; align-items: stretch;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 15px;" onclick="openLedger('${c.id}')">${escapeHtml(c.name)} ›</div>
+                  <span class="badge ${amt > 0 ? "badge-due" : "badge-clear"}">${amt > 0 ? "Pending Due" : "Cleared"}</span>
+                </div>
+                <div style="font-size: 17px; font-weight: 800; color: ${amt > 0 ? "var(--red)" : "var(--green)"};">₹${amt.toLocaleString("en-IN")}</div>
+              </div>
+              <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" onclick="quickDueAction('${c.id}', 'due')">+ Due</button>
+                <button class="btn btn-success btn-sm" onclick="quickDueAction('${c.id}', 'payment')">Pay (-₹)</button>
+                ${amt > 0 ? `<button class="btn btn-outline btn-sm" onclick="settleFullDue('${c.id}')">Settle Full</button>` : ""}
+                <button class="btn btn-outline btn-sm" onclick="openLedger('${c.id}')">History</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    // --- VOICE & GEMINI ---
+    function setLang(lang) {
+      state.lang = lang;
+      ["bn", "en", "hi"].forEach((l) => {
+        document.getElementById(`lang-${l}`).classList.toggle("active", l === lang);
+      });
+    }
+
+    let recognition = null;
+    let isRecording = false;
+
+    function toggleVoice() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        alert("এই ব্রাউজারে সরাসরি ভয়েস রেকগনিশন নেই—নিচে লিখে আপডেট করুন।");
+        return;
+      }
+
+      const btn = document.getElementById("micBtn");
+      const statusEl = document.getElementById("micStatus");
+
+      if (isRecording && recognition) {
+        recognition.stop();
+        return;
+      }
+
+      recognition = new SpeechRec();
+      recognition.lang = state.lang === "bn" ? "bn-IN" : state.lang === "hi" ? "hi-IN" : "en-IN";
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        btn.classList.add("recording");
+        statusEl.textContent = "শুনছি... স্পষ্ট করে বলুন";
+      };
+
+      recognition.onresult = (ev) => {
+        const transcript = ev.results[0][0].transcript;
+        document.getElementById("voiceText").value = transcript;
+        statusEl.textContent = "কথা ধরা হয়েছে";
+      };
+
+      recognition.onend = () => {
+        isRecording = false;
+        btn.classList.remove("recording");
+        if ((document.getElementById("voiceText").value || "").trim()) {
+          processVoiceStatement();
+        }
+      };
+
+      recognition.onerror = () => {
+        isRecording = false;
+        btn.classList.remove("recording");
+        statusEl.textContent = "আবার চেষ্টা করুন বা নিচে লিখুন";
+      };
+
+      recognition.start();
+    }
+
+    function applyStockChange(item) {
+      const name = (item.name || "").trim();
+      if (!name) return null;
+      const qtyDelta = Number(item.qty_delta || 0);
+      const unitPrice = Number(item.unit_price || 0);
+      const category = (item.category || "General").trim();
+
+      const existing = state.stock.find((s) => s.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        existing.qty = Math.max(0, Number(existing.qty || 0) + qtyDelta);
+        if (unitPrice > 0) existing.price = unitPrice;
+        if (category && category !== "General") existing.category = category;
+        return `${existing.name} (${qtyDelta >= 0 ? "+" : ""}${qtyDelta} -> ${existing.qty} pcs)`;
+      } else {
+        const newQty = Math.max(0, qtyDelta);
+        state.stock.push({
+          id: "stk_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          name,
+          qty: newQty,
+          price: unitPrice,
+          category
+        });
+        return `${name} (+${newQty} pcs, new item)`;
+      }
+    }
+
+    async function processVoiceStatement() {
+      const statement = (document.getElementById("voiceText").value || "").trim();
+      const outEl = document.getElementById("voiceResult");
+      if (!statement) {
+        outEl.innerHTML = `<div class="banner banner-err">আগে কিছু বলুন বা লিখুন।</div>`;
+        return;
+      }
+      if (!state.config.apiKey) {
+        openSettings();
+        return;
+      }
+
+      const btn = document.getElementById("voiceSubmitBtn");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+      outEl.innerHTML = `<div class="banner banner-info">AI বিশ্লেষণ করছে...</div>`;
+
+      const currentStockNames = state.stock.map((s) => s.name).join(", ");
+      const currentDueNames = state.udhar.map((u) => u.name).join(", ");
+
+      const prompt = `You are Tracop's inventory & customer udhar (credit) parser for Indian shopkeepers (Bengali/Hindi/English).
+Parse the statement into structured actions.
+- Purchase/stock added: positive qty_delta. Sale/stock reduced: negative qty_delta.
+- Customer credit/due added ("বাকি", "ধার", "due"): action "udhar_add", customer_name, amount, optional deducted stock items in stock_changes.
+- Customer due paid/settled ("শোধ", "জমা", "দিল", "paid"): action "udhar_pay", customer_name, amount.
+Keep product names clean in English or clear common retail name so matching works reliably. Preserve customer names clearly.
+Existing stock items: [${currentStockNames}]
+Existing due customers: [${currentDueNames}]
+Statement: "${statement}"`;
+
+      const schema = {
+        type: "OBJECT",
+        properties: {
+          stock_changes: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING" },
+                qty_delta: { type: "NUMBER" },
+                unit_price: { type: "NUMBER" },
+                category: { type: "STRING" }
+              },
+              required: ["name", "qty_delta"]
+            }
+          },
+          udhar_changes: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                action: { type: "STRING", enum: ["udhar_add", "udhar_pay"] },
+                customer_name: { type: "STRING" },
+                amount: { type: "NUMBER" },
+                note: { type: "STRING" }
+              },
+              required: ["action", "customer_name", "amount"]
+            }
+          }
+        },
+        required: ["stock_changes", "udhar_changes"]
+      };
+
+      try {
+        const parsed = await callGeminiWithFallback(
+          state.config.apiKey,
+          [{ text: prompt }],
+          schema,
+          (msg) => {
+            outEl.innerHTML = `<div class="banner banner-info">${escapeHtml(msg)}</div>`;
+          }
+        );
+
+        const notes = [];
+
+        (parsed.stock_changes || []).forEach((sc) => {
+          const msg = applyStockChange(sc);
+          if (msg) notes.push(`📦 ${msg}`);
+        });
+
+        (parsed.udhar_changes || []).forEach((uc) => {
+          const isPay = uc.action === "udhar_pay";
+          const updated = upsertCustomerDue(
+            uc.customer_name,
+            uc.amount,
+            uc.note || statement,
+            isPay ? "payment" : "due"
+          );
+          if (updated) {
+            notes.push(
+              isPay
+                ? `💚 ${updated.cust.name}: -₹${updated.actualChange} জমা (Due: ₹${updated.cust.dueAmount})`
+                : `🔴 ${updated.cust.name}: +₹${updated.actualChange} বাকি (Due: ₹${updated.cust.dueAmount})`
+            );
+          }
+        });
+
+        saveAll();
+        if (notes.length) {
+          logHistory(notes.join(" | "));
+          outEl.innerHTML = `<div class="banner banner-ok">✅ Updated:\n${notes.join("\n")}</div>`;
+        } else {
+          outEl.innerHTML = `<div class="banner banner-err">কোনো স্টক বা বাকির তথ্য পাওয়া যায়নি। আবার বলুন।</div>`;
+        }
+      } catch (err) {
+        const friendly = /high demand|overloaded|unavailable|503|429/i.test(err.message)
+          ? "এখন সার্ভার ব্যস্ত আছে। ১০–১৫ সেকেন্ড পরে আবার চেষ্টা করুন বা স্টক/বাকি ট্যাবে সরাসরি লিখুন।"
+          : err.message;
+        outEl.innerHTML = `<div class="banner banner-err">⚠️ ${escapeHtml(friendly)}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "✨ Update Stock / Due with AI";
+      }
+    }
+
+    // --- SCAN (STOCK BILL OR DUE BILL / KHATA) ---
+    function setScanMode(mode) {
+      state.scanMode = mode;
+      document.getElementById("modeStockBtn").classList.toggle("active", mode === "stock");
+      document.getElementById("modeDueBtn").classList.toggle("active", mode === "due");
+      document.getElementById("scanDraftArea").innerHTML = "";
+    }
+
+    function triggerCamera() {
+      document.getElementById("cameraInput").click();
+    }
+
+    function triggerGallery() {
+      document.getElementById("galleryInput").click();
+    }
+
+    function handleImageFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const img = document.getElementById("scanPreview");
+        img.src = dataUrl;
+        img.classList.remove("hidden");
+        resizeAndAnalyzeImage(dataUrl);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    function resizeAndAnalyzeImage(dataUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1024;
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.82).split(",")[1];
+        analyzeScannedImage(compressedBase64);
+      };
+      img.src = dataUrl;
+    }
+
+    async function analyzeScannedImage(base64Data) {
+      if (!state.config.apiKey) {
+        openSettings();
+        return;
+      }
+
+      const statusEl = document.getElementById("scanStatus");
+      const draftEl = document.getElementById("scanDraftArea");
+      draftEl.innerHTML = "";
+      statusEl.innerHTML = `<div class="banner banner-info">ছবি দেখা হচ্ছে...</div>`;
+
+      const isDue = state.scanMode === "due";
+      const prompt = isDue
+        ? `Extract customer udhar / due records from this due bill, credit slip, or handwritten khata page.
+Return each entry with customer_name, amount (positive rupees), entry_type ("due" if credit/baki/unpaid or "payment" if paid/jama/shodh), and brief note.`
+        : `Extract all products or wholesale bill line items from this image.
+Return each item with name, qty (default 1 if single product), unit_price (0 if not visible), and category (e.g., FMCG, Grocery, Electrical, Personal Care).`;
+
+      const schema = isDue
+        ? {
+            type: "OBJECT",
+            properties: {
+              entries: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    customer_name: { type: "STRING" },
+                    amount: { type: "NUMBER" },
+                    entry_type: { type: "STRING", enum: ["due", "payment"] },
+                    note: { type: "STRING" }
+                  },
+                  required: ["customer_name", "amount", "entry_type"]
+                }
+              }
+            },
+            required: ["entries"]
+          }
+        : {
+            type: "OBJECT",
+            properties: {
+              items: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    name: { type: "STRING" },
+                    qty: { type: "NUMBER" },
+                    unit_price: { type: "NUMBER" },
+                    category: { type: "STRING" }
+                  },
+                  required: ["name", "qty", "unit_price"]
+                }
+              }
+            },
+            required: ["items"]
+          };
+
+      try {
+        const parsed = await callGeminiWithFallback(
+          state.config.apiKey,
+          [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }],
+          schema,
+          (msg) => {
+            statusEl.innerHTML = `<div class="banner banner-info">${escapeHtml(msg)}</div>`;
+          }
+        );
+
+        if (isDue) {
+          const entries = parsed.entries || [];
+          if (!entries.length) {
+            statusEl.innerHTML = `<div class="banner banner-err">কোনো বাকি বা টাকার হিসাব পাওয়া যায়নি।</div>`;
+            return;
+          }
+          statusEl.innerHTML = `<div class="banner banner-ok">✅ Found ${entries.length} due entry(s). Verify & save:</div>`;
+          draftEl.innerHTML = `
+            <div style="margin-top: 10px;">
+              ${entries
+                .map(
+                  (e, i) => `
+                  <div class="card" style="padding: 10px; margin-bottom: 8px;">
+                    <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px;">
+                      <input type="text" id="dueDraftName_${i}" value="${escapeAttr(e.customer_name)}" placeholder="Customer Name" />
+                      <input type="number" id="dueDraftAmt_${i}" value="${Number(e.amount || 0)}" placeholder="₹ Amount" />
+                      <select id="dueDraftType_${i}">
+                        <option value="due" ${e.entry_type !== "payment" ? "selected" : ""}>+ Due (বাকি)</option>
+                        <option value="payment" ${e.entry_type === "payment" ? "selected" : ""}>- Pay (জমা)</option>
+                      </select>
+                    </div>
+                  </div>`
+                )
+                .join("")}
+              <button class="btn btn-success" style="width: 100%;" onclick="saveScannedDue(${entries.length})">✅ Save All to Due Ledger</button>
+            </div>`;
+        } else {
+          const items = parsed.items || [];
+          if (!items.length) {
+            statusEl.innerHTML = `<div class="banner banner-err">কোনো প্রোডাক্ট বা বিল আইটেম পাওয়া যায়নি।</div>`;
+            return;
+          }
+          statusEl.innerHTML = `<div class="banner banner-ok">✅ Found ${items.length} item(s). Check quantities & save:</div>`;
+          draftEl.innerHTML = `
+            <div style="margin-top: 10px;">
+              ${items
+                .map(
+                  (it, i) => `
+                  <div class="card" style="padding: 10px; margin-bottom: 8px;">
+                    <input type="hidden" id="stkDraftCat_${i}" value="${escapeAttr(it.category || "General")}" />
+                    <div style="display: grid; grid-template-columns: 1.6fr 0.7fr 0.8fr; gap: 6px;">
+                      <input type="text" id="stkDraftName_${i}" value="${escapeAttr(it.name)}" placeholder="Item Name" />
+                      <input type="number" id="stkDraftQty_${i}" value="${Number(it.qty || 1)}" placeholder="Qty" />
+                      <input type="number" id="stkDraftPrice_${i}" value="${Number(it.unit_price || 0)}" placeholder="₹ Price" />
+                    </div>
+                  </div>`
+                )
+                .join("")}
+              <button class="btn btn-success" style="width: 100%;" onclick="saveScannedStock(${items.length})">✅ Save All to Inventory</button>
+            </div>`;
+        }
+      } catch (err) {
+        const friendly = /high demand|overloaded|unavailable|503|429/i.test(err.message)
+          ? "এখন সার্ভার ব্যস্ত আছে। একটু পরে আবার ছবি স্ক্যান করুন।"
+          : err.message;
+        statusEl.innerHTML = `<div class="banner banner-err">⚠️ ${escapeHtml(friendly)}</div>`;
+      }
+    }
+
+    function saveScannedStock(count) {
+      let added = 0;
+      for (let i = 0; i < count; i++) {
+        const name = (document.getElementById(`stkDraftName_${i}`)?.value || "").trim();
+        const qty = Number(document.getElementById(`stkDraftQty_${i}`)?.value || 0);
+        const price = Number(document.getElementById(`stkDraftPrice_${i}`)?.value || 0);
+        const category = (document.getElementById(`stkDraftCat_${i}`)?.value || "General").trim();
+        if (name && qty > 0) {
+          applyStockChange({ name, qty_delta: qty, unit_price: price, category });
+          added++;
+        }
+      }
+      saveAll();
+      if (added > 0) {
+        logHistory(`Scanned & saved ${added} stock item(s)`);
+        document.getElementById("scanDraftArea").innerHTML = "";
+        document.getElementById("scanStatus").innerHTML = `<div class="banner banner-ok">✅ ${added} item(s) saved to Stock!</div>`;
+        renderStock();
+      }
+    }
+
+    function saveScannedDue(count) {
+      let saved = 0;
+      for (let i = 0; i < count; i++) {
+        const name = (document.getElementById(`dueDraftName_${i}`)?.value || "").trim();
+        const amount = Number(document.getElementById(`dueDraftAmt_${i}`)?.value || 0);
+        const type = document.getElementById(`dueDraftType_${i}`)?.value || "due";
+        if (name && amount > 0) {
+          const res = upsertCustomerDue(name, amount, "Scanned due bill", type);
+          if (res) {
+            logHistory(
+              type === "payment"
+                ? `Scanned payment -₹${res.actualChange} from ${name}`
+                : `Scanned due +₹${res.actualChange} for ${name}`
+            );
+            saved++;
+          }
+        }
+      }
+      saveAll();
+      if (saved > 0) {
+        document.getElementById("scanDraftArea").innerHTML = "";
+        document.getElementById("scanStatus").innerHTML = `<div class="banner banner-ok">✅ ${saved} due entry(s) saved to Due Ledger!</div>`;
+        renderDue();
+      }
+    }
+
+    // --- HISTORY & SETTINGS ---
+    function renderHistory() {
+      const el = document.getElementById("historyList");
+      if (!state.history.length) {
+        el.innerHTML = `<div class="empty-state">No activity logged yet.</div>`;
+        return;
+      }
+      el.innerHTML = state.history
+        .map(
+          (h) => `
+          <div class="card" style="padding: 10px 14px; margin-bottom: 8px;">
+            <div style="font-size: 13px; font-weight: 600;">${escapeHtml(h.text)}</div>
+            <div style="font-size: 11px; color: var(--muted); margin-top: 3px;">${escapeHtml(h.time)}</div>
+          </div>`
+        )
+        .join("");
+    }
+
+    function clearHistory() {
+      state.history = [];
+      saveAll();
+      renderHistory();
+    }
+
+    function openSettings() {
+      document.getElementById("cfgShopName").value = state.config.shopName || "";
+      document.getElementById("cfgApiKey").value = state.config.apiKey || "";
+      document.getElementById("settingsModal").classList.add("open");
+    }
+
+    function closeSettings() {
+      document.getElementById("settingsModal").classList.remove("open");
+    }
+
+    function saveSettings() {
+      state.config.shopName = (document.getElementById("cfgShopName").value || "").trim();
+      state.config.apiKey = (document.getElementById("cfgApiKey").value || "").trim();
+      saveAll();
+      closeSettings();
+      renderStock();
+    }
+
+    function resetStockOnly() {
+      if (!confirm("Clear all stock items?")) return;
+      state.stock = [];
+      saveAll();
+      closeSettings();
+      renderStock();
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/'/g, "&#39;");
+    }
+
+    applyHeader();
+    renderStock();
+  </script>
+</body>
+</html>
